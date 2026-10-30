@@ -147,7 +147,7 @@ If you want to work on the tests: <br>
 | Logan Comble              |       /   |      /  
 | Alekseï Mollet-Zielinski |       /   |      /  
 | Théo Neveu                |       /   |      /
-| Audrey Vasseur            |       /   |      /  
+| Audrey Vasseur            | QA Automation Lead |      /  
 | William Willemart         |       /   |      /  
 
 </details>
