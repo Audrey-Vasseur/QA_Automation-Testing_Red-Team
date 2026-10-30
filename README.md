@@ -1,6 +1,6 @@
 # Appium Android - Automation Testing - Red Team
 
-## I. How to launch the project
+## I. How to configure the project
 <details>
 <summary>More informations below</summary>
 
