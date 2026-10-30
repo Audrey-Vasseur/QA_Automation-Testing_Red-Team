@@ -3,8 +3,10 @@
 ## I. How to configure the project
 <details>
 <summary>More informations below</summary>
-
-→ You must have clone the repository before doing all of this.
+<br>
+  
+→ You must have clone the repository before doing all of this. <br>
+→ You must create an account for WordPress if you don't already own one
 
 ### 1) WordPress apk download
 Download the WordPress apk in the GitHub releases:
@@ -120,10 +122,25 @@ Then click on the Start Session Button. WordPress is now launched on your emulat
 -------------------------------------------------------------------
 </details>
 
-## II. Individual contributions
+## II. How to launch the tests
 
 <details>
 <summary>More informations below</summary>
+<br>
+1: Open Android Studio, go in *Virtual Device Manager* and start your phone <br>
+2: Launch the appium server in IntelliJ's terminal by typing *appium* <br>
+3: Run the tests by clicking on the green arrow <br>
+<br>
+If you want to work on the test: <br>
+4: Open Appium Inspector
+
+</details>
+
+## III. Individual contributions
+
+<details>
+<summary>More informations below</summary>
+<br>  
   
 | Name | Role | Tasks
 | :-----------------------: | :-------: | :----------:
