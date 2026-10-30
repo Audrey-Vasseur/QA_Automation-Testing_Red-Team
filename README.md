@@ -127,8 +127,8 @@ Then click on the Start Session Button. WordPress is now launched on your emulat
 <details>
 <summary>More informations below</summary>
 <br>
-1: Open Android Studio, go in *Virtual Device Manager* and start your phone <br>
-2: Launch the appium server in IntelliJ's terminal by typing *appium* <br>
+1: Open Android Studio, go to Virtual Device Manager and start your phone <br>
+2: Launch the appium server in IntelliJ's terminal by typing appium <br>
 3: Run the tests by clicking on the green arrow <br>
 <br>
 If you want to work on the test: <br>
