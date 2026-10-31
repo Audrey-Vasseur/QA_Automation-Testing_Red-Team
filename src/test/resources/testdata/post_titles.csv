@@ -1,0 +1,6 @@
+case;title
+Titre simple;Simple draft title
+Accents francais;Brouillon accentué : été, crème, garçon
+Caracteres speciaux;Special chars & symbols #1 (test) @ %
+Chiffres;Release 2026 version 10.5
+Titre long (100+ caracteres);A very long draft title used to check that long text is stored and displayed completely in the post list

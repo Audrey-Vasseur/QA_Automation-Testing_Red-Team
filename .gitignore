@@ -37,3 +37,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
+### Tests UI ###
+src/test/resources/config.properties

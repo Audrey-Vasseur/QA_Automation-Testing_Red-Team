@@ -1,0 +1,27 @@
+# UI test case inventory – WordPress Android 27.7 (Appium / UiAutomator2 / Java)
+
+**Common precondition for every test:** emulator started, Appium server running on `127.0.0.1:4723`,
+WordPress app installed and logged in to the team member's own WordPress.com **test** account with one
+free test site. Each test starts its own Appium session on the "My Site" screen (`BaseUiTest`), creates the
+data it needs with a unique name, and deletes it at the end (`PostCleanup` / `finally` blocks).
+
+Source code: `src/test/java/ui/`, page objects: `src/test/java/pages/`.
+Actual results: run of 31/10/2026 on emulator `wp_pixel` (Android 16, API 36). Reports: `target/surefire-reports/`.
+
+| ID | Name (JUnit display name) | Type | Mandatory UI element | Test data | Steps | Expected result | Key assertions | Actual result |
+|---|---|---|---|---|---|---|---|---|
+| UI-01 | Create a draft with title and text: it appears in Drafts | Positive | Text input, text area | Unique title `UI-01 Draft <id>`, 2 lines of text | Posts → Create a post → type title → type 2 lines → close editor | Banner "Draft saved online"; the draft is listed in the Drafts tab | `appearsWith("Draft saved online")`, `isPostListed(title)` | ✅ Pass |
+| UI-02 | Address of a site that is not WordPress: error message | Negative | Text input | `example.com` | Switch site → Add a site → Add self-hosted site → type address → Continue | Error "The site does not appear to be a WordPress site." and the typed address is kept | `isContinueEnabled()`, exact error text, `siteAddress()` unchanged | ✅ Pass |
+| UI-03 | Continue is enabled only for a well-formed address (4 data sets) | Field validation | Text input | empty / `invalid url @@` / `example.com` / `https://wordpress.org` | Open the self-hosted login form → type the address | Continue disabled for empty and malformed values, enabled for valid ones | `enabled` attribute of the Continue button | ✅ Pass (4/4) |
+| UI-04 | Posts per page: 1 and 100 accepted, 0 and 101 refused | Boundary | Number input | 1, 100, 0, 101 (range observed in the app: 1–100) | Site Settings → Posts per page → type value + Enter → OK, for each value; restore original value | 1 and 100 saved; 0 and 101 rejected, saved value stays within 1–100 | value shown by the picker, value saved in the settings list | ✅ Pass |
+| UI-05 | Choose a status: the chosen value is shown and checked | Dropdown / state | Dropdown (single-choice dialog) | `Pending review`, `Private` | New post → More options → Post settings → Status & Visibility → choose option → OK | Status row shows the chosen value; option is checked when the list is reopened | `status()`, `isStatusOptionChecked()` | ✅ Pass |
+| UI-06 | Future date = scheduled; past date = backdated | Date validation | Date picker (+ time picker) | next month, day 15; two months ago, day 1 | Post settings → Publish Date → pick date → OK → keep time | Future: "Schedule for: <date>" and button SCHEDULE. Past: "Backdated for: <date>" and button PUBLISH (cannot be scheduled in the past) | label prefix + formatted date, primary button label | ✅ Pass |
+| UI-07 | Permanent deletion: CANCEL keeps the post, DELETE removes it | Dialog handling | Confirmation dialog | Unique draft moved to trash by the test | Trashed tab → More → Delete Permanently → CANCEL; then again → DELETE | Dialog "Delete post?" with a warning; CANCEL keeps the post; DELETE removes it | dialog title/message/button, `isPostListed`, `isPostGone` | ✅ Pass |
+| UI-08 | Trashing shows an UNDO banner that restores the post then disappears | Dynamic element | Dynamic element (snackbar) | Unique draft | Drafts → More → Trash → tap UNDO | Banner "Post sent to trash" + UNDO appears; after UNDO the post is back and the banner disappears | `appearsWith`, `actionLabel`, `isPostListed`, `disappears` | ✅ Pass |
+| UI-09 | Upload a PNG image: accepted and file name shown | File validation (accepted) | Image / file upload | `valid_image.png` (200×120 PNG) pushed as `ui09_<id>.png` | Push file to the phone gallery → Media → + → Choose from device → select → Confirm | Upload finishes without error; the media detail shows the same file name | upload state, `isMediaListed`, file name in detail | ✅ Pass |
+| UI-10 | Edit a draft title: title changes and the multi-line text is kept | State verification + regression | Text input, text area | 3 lines of text, two unique titles | Create draft → reopen → change title → close → reopen | New title saved; the 3 lines are unchanged and in order | `title()`, `bodyLines()` | ✅ Pass |
+| UI-11 | Create a draft with different kinds of titles (5 CSV rows) | Data-driven | Text input | `testdata/post_titles.csv`: simple, French accents, special characters, numbers, 100+ characters | Same steps as UI-01 for each row | Each title is displayed exactly as typed in Drafts | `isPostListed(title)` per row (one report line per row) | ✅ Pass (5/5) after the fix described in failure-investigation.md (first run: 3/5) |
+| UI-12 | Upload a file that is not an image: rejected | Failure-oriented / file validation (rejected) | Image / file upload | `not_an_image.png` (text file renamed .png) | Same steps as UI-09 | The upload is refused and the thumbnail shows "Upload Failed" | upload state = `Upload Failed` | ✅ Pass |
+
+Genuine automation failures met during development, their root cause and the fix: see
+[failure-investigation.md](failure-investigation.md).
