@@ -6,19 +6,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Repartit les telephones (emulateurs) entre les tests qui tournent en parallele.
- *
- * Un emulateur ne peut executer qu'un seul test a la fois. Chaque test "emprunte" donc
- * un appareil libre au debut et le rend a la fin. S'il n'y a qu'un emulateur, les tests
- * attendent leur tour : le parallele ne casse rien, il est simplement limite.
- *
- * Chaque appareil a aussi son propre systemPort (port interne d'UiAutomator2),
- * sinon deux sessions Appium simultanees entrent en conflit.
- */
 public final class DevicePool {
-
-    /** Un appareil : son identifiant adb et le port UiAutomator2 qui lui est reserve. */
     public record Device(String udid, int systemPort) {
     }
 
@@ -28,7 +16,6 @@ public final class DevicePool {
     }
 
     private static BlockingQueue<Device> buildPool() {
-        // ex : devices=emulator-5554,emulator-5556
         List<String> udids = Arrays.stream(AppConfig.get("devices", "emulator-5554").split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
@@ -44,12 +31,12 @@ public final class DevicePool {
         try {
             Device device = FREE_DEVICES.poll(10, TimeUnit.MINUTES);
             if (device == null) {
-                throw new IllegalStateException("Aucun appareil libre apres 10 minutes d'attente");
+                throw new IllegalStateException("No free device after waiting 10 minutes");
             }
             return device;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("Attente d'un appareil interrompue", e);
+            throw new IllegalStateException("Interrupted while waiting for a device", e);
         }
     }
 

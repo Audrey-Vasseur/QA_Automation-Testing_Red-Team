@@ -16,16 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Suppression d'articles : boite de confirmation et bandeau "UNDO".
- */
 @Tag("ui")
 class PostDeletionTest extends BaseUiTest {
-
     @Test
-    @DisplayName("UI-07 [Dialogue] Suppression definitive : ANNULER garde l'article, DELETE le supprime")
+    @DisplayName("UI-07 [Dialog] Permanent deletion: CANCEL keeps the post, DELETE removes it")
     void UI_07_deleteDialog_cancelKeeps_confirmDeletes() {
-        // Precondition : un article dans la corbeille, cree par ce test.
         String title = TestData.uniqueTitle("UI-07 Dialog");
         PostsListPage list = mySite.openPosts().createDraft(title, List.of());
         cleanup.register(title, PostTab.DRAFTS);
@@ -33,25 +28,23 @@ class PostDeletionTest extends BaseUiTest {
         cleanup.moved(title, PostTab.TRASHED);
         list.openTab(PostTab.TRASHED);
 
-        // 1) Annuler
         ConfirmDialog dialog = list.askPermanentDeletion(title);
-        assertAll("Contenu de la boite de confirmation",
+        assertAll("Confirmation dialog content",
                 () -> assertEquals("Delete post?", dialog.title()),
-                () -> assertTrue(dialog.message().contains("permanently"), "Le message doit prevenir que c'est definitif"),
+                () -> assertTrue(dialog.message().contains("permanently"), "The message should warn that it is permanent"),
                 () -> assertEquals("DELETE", dialog.positiveLabel()));
         dialog.cancel();
-        assertAll("Apres ANNULER",
-                () -> assertTrue(dialog.isClosed(), "La boite doit se fermer"),
-                () -> assertTrue(list.isPostListed(title), "L'article doit toujours etre dans la corbeille"));
+        assertAll("After CANCEL",
+                () -> assertTrue(dialog.isClosed(), "The dialog should close"),
+                () -> assertTrue(list.isPostListed(title), "The post should still be in the trash"));
 
-        // 2) Confirmer
         list.askPermanentDeletion(title).confirm();
-        assertTrue(list.isPostGone(title), "Apres DELETE, l'article ne doit plus etre dans la corbeille");
-        cleanup.forget(title); // deja supprime par le test
+        assertTrue(list.isPostGone(title), "After DELETE, the post should no longer be in the trash");
+        cleanup.forget(title);
     }
 
     @Test
-    @DisplayName("UI-08 [Element dynamique] Mettre a la corbeille affiche un bandeau UNDO qui restaure l'article puis disparait")
+    @DisplayName("UI-08 [Dynamic element] Trashing shows an UNDO banner that restores the post, then disappears")
     void UI_08_trashSnackbar_undoRestoresPost() {
         String title = TestData.uniqueTitle("UI-08 Undo");
         PostsListPage list = mySite.openPosts().createDraft(title, List.of());
@@ -60,15 +53,14 @@ class PostDeletionTest extends BaseUiTest {
 
         Snackbar snackbar = list.trashPost(title);
 
-        // Le bandeau APPARAIT apres l'action (attente explicite, pas de pause fixe).
-        assertAll("Bandeau apres la mise a la corbeille",
-                () -> assertTrue(snackbar.appearsWith("Post sent to trash"), "Message 'Post sent to trash' attendu"),
+        assertAll("Banner after trashing",
+                () -> assertTrue(snackbar.appearsWith("Post sent to trash"), "Expected message 'Post sent to trash'"),
                 () -> assertEquals("UNDO", snackbar.actionLabel()));
 
         snackbar.tapAction();
 
-        assertAll("Apres UNDO",
-                () -> assertTrue(list.isPostListed(title), "L'article doit revenir dans les brouillons"),
-                () -> assertTrue(snackbar.disappears(), "Le bandeau doit disparaitre de lui-meme"));
+        assertAll("After UNDO",
+                () -> assertTrue(list.isPostListed(title), "The post should be back in Drafts"),
+                () -> assertTrue(snackbar.disappears(), "The banner should disappear by itself"));
     }
 }

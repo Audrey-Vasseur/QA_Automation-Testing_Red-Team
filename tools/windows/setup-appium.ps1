@@ -1,11 +1,11 @@
 # ---------------------------------------------------------------------------
-#  Installation de l'environnement Appium Android (Windows) - projet Red Team
-#  Installe : SDK Android (ligne de commande), emulateur, image Android,
-#             Appium + driver UiAutomator2, APK WordPress 27.7
-#  Le script peut etre relance sans risque : il saute ce qui est deja installe.
+#  Appium Android environment setup (Windows) - Red Team project
+#  Installs: Android SDK (command line), emulator, Android system image,
+#            Appium + UiAutomator2 driver, WordPress 27.7 APK
+#  Safe to run again: already installed parts are skipped.
 # ---------------------------------------------------------------------------
-$ErrorActionPreference = "Continue"   # les outils natifs ecrivent sur stderr sans etre en erreur
-$ProgressPreference = "SilentlyContinue"   # accelere fortement Invoke-WebRequest
+$ErrorActionPreference = "Continue"
+$ProgressPreference = "SilentlyContinue"
 
 $ToolsDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
 $SdkRoot    = Join-Path $env:LOCALAPPDATA "Android\Sdk"
@@ -34,7 +34,7 @@ Step "Java (JAVA_HOME)"
 if (-not $env:JAVA_HOME -or -not (Test-Path $env:JAVA_HOME)) {
     $jdk = Get-ChildItem (Join-Path $env:USERPROFILE ".jdks") -Directory -ErrorAction SilentlyContinue |
            Sort-Object Name -Descending | Select-Object -First 1
-    if (-not $jdk) { throw "Aucun JDK trouve dans $env:USERPROFILE\.jdks. Installe un JDK depuis IntelliJ (File > Project Structure > SDKs)." }
+    if (-not $jdk) { throw "No JDK found in $env:USERPROFILE\.jdks. Install a JDK from IntelliJ (File > Project Structure > SDKs)." }
     [Environment]::SetEnvironmentVariable("JAVA_HOME", $jdk.FullName, "User")
     $env:JAVA_HOME = $jdk.FullName
 }
@@ -44,19 +44,19 @@ Ok "JAVA_HOME = $env:JAVA_HOME"
 # 2) Node.js ----------------------------------------------------------------
 Step "Node.js"
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Host "    Node.js absent, installation via winget..."
+    Write-Host "    Node.js missing, installing with winget..."
     winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements
     $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
 }
 Ok ("node " + (node -v))
 
-# 3) SDK Android en ligne de commande ---------------------------------------
+# 3) Android SDK command-line tools ---------------------------------------
 Step "SDK Android ($SdkRoot)"
 $sdkManager = Join-Path $SdkRoot "cmdline-tools\latest\bin\sdkmanager.bat"
 if (-not (Test-Path $sdkManager)) {
     New-Item -ItemType Directory -Force -Path $SdkRoot | Out-Null
     $zip = Join-Path $env:TEMP "android-cmdline-tools.zip"
-    Write-Host "    Telechargement des command-line tools..."
+    Write-Host "    Downloading command-line tools..."
     Invoke-WebRequest $CmdToolsUrl -OutFile $zip
     $extract = Join-Path $env:TEMP "android-cmdline-tools"
     if (Test-Path $extract) { Remove-Item $extract -Recurse -Force }
@@ -72,24 +72,24 @@ Add-UserPath (Join-Path $SdkRoot "emulator")
 Add-UserPath (Join-Path $SdkRoot "cmdline-tools\latest\bin")
 Ok "ANDROID_HOME = $SdkRoot"
 
-Step "Licences du SDK Android : reponds 'y' a chaque question"
+Step "Android SDK licenses: answer 'y' to each question"
 & $sdkManager --sdk_root=$SdkRoot --licenses
 
-Step "Installation des paquets Android (plusieurs Go, patience)"
+Step "Installing Android packages (several GB, please wait)"
 & $sdkManager --sdk_root=$SdkRoot "platform-tools" "emulator" "platforms;android-$ApiLevel" $SystemImg
-Ok "Paquets installes"
+Ok "Packages installed"
 
-# 4) Telephone virtuel -------------------------------------------------------
-Step "Telephone virtuel '$AvdName'"
+# 4) Virtual device -------------------------------------------------------
+Step "Virtual device '$AvdName'"
 $avdManager = Join-Path $SdkRoot "cmdline-tools\latest\bin\avdmanager.bat"
 $existing = & $avdManager list avd -c
 if ($existing -notcontains $AvdName) {
     "no" | & $avdManager create avd -n $AvdName -k $SystemImg -d "pixel_7"
 }
-# Active le clavier du PC dans le telephone virtuel
+# Enable the PC keyboard in the virtual device
 $avdConfig = Join-Path $env:USERPROFILE ".android\avd\$AvdName.avd\config.ini"
 if (Test-Path $avdConfig) { (Get-Content $avdConfig) -replace '^hw.keyboard = no', 'hw.keyboard = yes' | Set-Content $avdConfig }
-Ok "AVD $AvdName pret"
+Ok "AVD $AvdName ready"
 
 # 5) Appium -----------------------------------------------------------------
 Step "Appium + driver UiAutomator2"
@@ -100,18 +100,18 @@ $drivers = (appium driver list --installed 2>&1) | Out-String
 if ($drivers -notmatch "uiautomator2") { appium driver install uiautomator2 }
 Ok ("appium " + (appium -v))
 
-# 6) APK WordPress ------------------------------------------------------------
-Step "APK WordPress 27.7"
+# 6) WordPress APK ------------------------------------------------------------
+Step "WordPress 27.7 APK"
 if (-not (Test-Path $ApkPath)) {
     New-Item -ItemType Directory -Force -Path $ApkDir | Out-Null
-    Write-Host "    Telechargement (~300 Mo)..."
+    Write-Host "    Downloading (~300 MB)..."
     Invoke-WebRequest $ApkUrl -OutFile $ApkPath
 }
 Ok "APK : $ApkPath"
 
-Step "Verification finale"
+Step "Final check"
 appium driver doctor uiautomator2
 & (Join-Path $SdkRoot "emulator\emulator.exe") -accel-check
 
 Write-Host ""
-Write-Host "Installation terminee. Ferme cette fenetre puis lance 2-start-emulator.bat et 3-start-appium.bat." -ForegroundColor Green
+Write-Host "Setup complete. Close this window, then run 2-start-emulator.bat and 3-start-appium.bat." -ForegroundColor Green

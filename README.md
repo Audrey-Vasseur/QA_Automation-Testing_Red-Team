@@ -195,8 +195,8 @@ tools/windows/                  setup scripts (SDK, emulator, Appium, APK)
 1. Follow part I (Android SDK, emulator, Appium + uiautomator2). On Windows, `tools/windows/1-setup.bat` does it automatically.
 2. Install the APK on the running emulator: `adb install -r -g wpandroid-27.7.apk` (or `tools/windows/install-apk.bat`).
 3. Open the WordPress app on the emulator and log in with a **test** WordPress.com account that owns one free site.
-4. Copy `src/test/resources/config.example.properties` to `src/test/resources/config.properties`
-   (this file is ignored by git) and adapt `devices` if needed (`adb devices`).
+4. Optional: copy `src/test/resources/config.example.properties` to `src/test/resources/config.properties`
+   (ignored by git) to change the defaults, e.g. `devices` (see `adb devices`). No password is needed.
 
 ### 5) Run
 Emulator and Appium (`appium --relaxed-security`, needed to push test files) must be running.
@@ -236,6 +236,29 @@ driver, `DevicePool`, unique test data) and the tests waiting for the device; ad
 | Alekseï Mollet-Zielinski |       /   |      /  
 | Théo Neveu                |       /   |      /
 | Audrey Vasseur            | QA Automation Lead |      /  
-| William Willemart         | UI automation | UI framework (`core/`, `pages/`, `utils/`), UI tests UI-01 to UI-12 (`src/test/java/ui/`), test data (`testdata/`), parallel configuration, setup scripts (`tools/windows/`), UI documentation (`docs/`) 
+| William Willemart         | UI automation | UI framework, UI tests UI-01 to UI-12, UI test data, parallel configuration, UI documentation (details below)
+
+### William Willemart – UI automation
+
+**Area:** UI automation of the WordPress Android app (framework + tests + documentation).
+
+**Files / modules I contributed to**
+
+| Module | Files | Work done |
+|---|---|---|
+| Framework core | `src/test/java/core/` – `AppConfig`, `DriverFactory`, `DevicePool`, `BaseUiTest` | configuration without secrets in code, one Appium driver per thread (`ThreadLocal`), one emulator per running test, common setup / teardown |
+| Page objects | `src/test/java/pages/` – `BasePage`, `MySitePage`, `PostsListPage`, `EditorPage`, `PostSettingsPage`, `PublishDatePage`, `MediaLibraryPage`, `SiteSettingsPage`, `SelfHostedLoginPage`, `AppPopups`, `components/ConfirmDialog`, `components/Snackbar` | Page Object Model, locator strategy (resource-id / accessibilityId), explicit waits, keyboard typing for the Gutenberg editor |
+| UI tests | `src/test/java/ui/` – `PostCreationTest`, `PostSettingsTest`, `PostDeletionTest`, `MediaUploadTest`, `SiteSettingsBoundaryTest`, `SelfHostedLoginTest`, `PostTitleDataDrivenTest` | 12 test cases: positive, negative, field validation, boundary, dropdown, date, dialog, dynamic element, file upload accepted / rejected, state verification, data-driven |
+| Utilities | `src/test/java/utils/` – `TestData`, `PostCleanup`, `DeviceFiles`, `Evidence`, `EvidenceOnFailure` | unique test data, cleanup after each test, pushing test images to the phone, screenshots + XML on failure |
+| Test data & config | `src/test/resources/` – `testdata/post_titles.csv`, `testdata/files/`, `config.example.properties`, `junit-platform.properties` | CSV for the data-driven test, valid / invalid image files, configuration template, parallel execution settings |
+| Tooling & docs | `tools/windows/`, `docs/ui-test-cases.md`, `docs/failure-investigation.md`, README part III, `pom.xml` (selenium-support, surefire) | Windows setup scripts, test case inventory, failure investigation, how to run the UI tests |
+
+**What I can explain during the demonstration**
+- How a test runs: `BaseUiTest` opens a session, the test uses page objects, `@AfterEach` deletes the test's data and closes the session.
+- The locator strategy and why there is no absolute XPath and no `Thread.sleep` (explicit `WebDriverWait`).
+- Every UI test (UI-01 to UI-12): its data, its steps and why each assertion is needed.
+- The data-driven test (`@ParameterizedTest` + `@CsvFileSource`): one report line per CSV row.
+- Parallel execution: `junit-platform.properties`, `ThreadLocal` driver, `DevicePool`, unique data – and the one-emulator limitation.
+- The failure investigations (stale element, typing synchronization, data-driven rows): detection, root cause, fix, verification.
 
 </details>

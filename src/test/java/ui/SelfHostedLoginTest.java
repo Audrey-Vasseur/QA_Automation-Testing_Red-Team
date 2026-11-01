@@ -13,34 +13,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Formulaire de connexion a un site auto-heberge ("Add self-hosted site").
- * Ce formulaire est accessible sans se deconnecter du compte de test.
- */
 @Tag("ui")
 class SelfHostedLoginTest extends BaseUiTest {
-
     @Test
-    @DisplayName("UI-02 [Negatif] Adresse d'un site qui n'est pas WordPress : message d'erreur et on reste sur le formulaire")
+    @DisplayName("UI-02 [Negative] Address of a non-WordPress site: error message, user stays on the form")
     void UI_02_nonWordPressAddress_showsError() {
         SelfHostedLoginPage login = mySite.openSelfHostedLogin()
-                .enterSiteAddress("example.com");   // site reel, mais pas un site WordPress
+                .enterSiteAddress("example.com");
 
-        assertTrue(login.isContinueEnabled(), "Une adresse bien formee doit activer Continue");
+        assertTrue(login.isContinueEnabled(), "A well-formed address should enable Continue");
         login.tapContinue();
 
-        assertAll("Erreur affichee",
+        assertAll("Error displayed",
                 () -> assertTrue(login.showsError("The site does not appear to be a WordPress site."),
-                        "Le message d'erreur exact doit s'afficher sous le champ"),
-                () -> assertEquals("example.com", login.siteAddress(), "La saisie doit etre conservee pour correction"));
+                        "The exact error message should be shown under the field"),
+                () -> assertEquals("example.com", login.siteAddress(), "The typed address should be kept for correction"));
     }
 
-    @ParameterizedTest(name = "UI-03 [Validation] adresse \"{0}\" -> Continue actif = {1}")
-    @DisplayName("UI-03 [Validation de champ] Le bouton Continue n'est actif que pour une adresse au bon format")
+    @ParameterizedTest(name = "UI-03 [Validation] address \"{0}\" -> Continue enabled = {1}")
+    @DisplayName("UI-03 [Field validation] Continue is enabled only for a well-formed address")
     @CsvSource(delimiter = '|', nullValues = "EMPTY", value = {
-            "EMPTY          | false",   // champ obligatoire vide
-            "invalid url @@ | false",   // espaces et caracteres interdits
-            "example.com    | true",    // nom de domaine valide
+            "EMPTY          | false",
+            "invalid url @@ | false",
+            "example.com    | true",
             "https://wordpress.org | true"
     })
     void UI_03_siteAddressFormat_controlsContinueButton(String address, boolean expectedEnabled) {
@@ -52,9 +47,9 @@ class SelfHostedLoginTest extends BaseUiTest {
         }
 
         if (expectedEnabled) {
-            assertTrue(login.isContinueEnabled(), "Continue doit etre actif pour : " + address);
+            assertTrue(login.isContinueEnabled(), "Continue should be enabled for: " + address);
         } else {
-            assertFalse(login.isContinueEnabled(), "Continue doit rester desactive pour : " + address);
+            assertFalse(login.isContinueEnabled(), "Continue should stay disabled for: " + address);
         }
     }
 }

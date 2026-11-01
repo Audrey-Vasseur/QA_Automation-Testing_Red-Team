@@ -8,14 +8,7 @@ import org.openqa.selenium.interactions.Actions;
 
 import java.util.List;
 
-/**
- * Editeur d'article (editeur de blocs Gutenberg, en React Native).
- *
- * Les champs n'ont pas de resource-id classique, mais exposent des libelles d'accessibilite
- * ("Post title. ...", "Paragraph Block. Row 1. ...") et des testID ("post-title", "add-block-button").
- */
 public class EditorPage extends BasePage {
-
     private static final By TITLE_FIELD = uiSelector(
             "new UiSelector().className(\"android.widget.EditText\").descriptionStartsWith(\"Post title\")");
     private static final String BODY_HINT = "Start writing…";
@@ -33,11 +26,9 @@ public class EditorPage extends BasePage {
         return this;
     }
 
-    /** Remplace le titre (efface l'ancien touche par touche, puis tape le nouveau). */
     public EditorPage typeTitle(String title) {
         clearWithKeyboard(TITLE_FIELD);
         typeWithKeyboard(TITLE_FIELD, title);
-        // On verifie que tout le titre est arrive dans le champ avant de passer a la suite.
         waiter().until(d -> title.equals(d.findElement(TITLE_FIELD).getText()));
         return this;
     }
@@ -46,20 +37,13 @@ public class EditorPage extends BasePage {
         return textOf(TITLE_FIELD);
     }
 
-    /**
-     * Saisit un texte sur plusieurs lignes (zone de texte multi-ligne) :
-     * chaque ligne devient un bloc paragraphe, comme quand un utilisateur appuie sur Entree.
-     */
     public EditorPage typeBody(List<String> lines) {
         click(EMPTY_BODY);
         for (int i = 0; i < lines.size(); i++) {
-            // Synchronisation : on attend que le bloc VIDE ait vraiment le focus avant de taper.
-            // Sans cette attente, les premieres lettres partaient dans le champ precedent
-            // (constate : titre "...Fi" et texte "Rst line..." au lieu de "First line...").
             waitForEmptyFocusedField();
             new Actions(driver).sendKeys(lines.get(i)).perform();
             if (i < lines.size() - 1) {
-                driver.pressKey(new KeyEvent(AndroidKey.ENTER)); // Entree = nouveau bloc paragraphe
+                driver.pressKey(new KeyEvent(AndroidKey.ENTER));
             }
         }
         return this;
@@ -72,23 +56,19 @@ public class EditorPage extends BasePage {
                 return false;
             }
             String text = focused.get(0).getText();
-            // Un champ vide affiche son texte d'aide ("Start writing…") ou rien du tout.
             return text.isEmpty() || text.equals(BODY_HINT);
         });
     }
 
-    /** Texte de chaque bloc paragraphe, dans l'ordre affiche. */
     public List<String> bodyLines() {
         visible(PARAGRAPH_BLOCKS);
         return driver.findElements(PARAGRAPH_BLOCKS).stream()
                 .map(block -> block.getAttribute("content-desc"))
-                // "Paragraph Block. Row 2. Second line" -> "Second line"
                 .map(desc -> desc.replaceFirst("^Paragraph Block\\. Row \\d+\\. ", ""))
                 .map(String::trim)
                 .toList();
     }
 
-    /** Libelle du bouton principal : PUBLISH, SCHEDULE, UPDATE... */
     public String primaryActionLabel() {
         return textOf(PRIMARY_ACTION);
     }
@@ -99,7 +79,6 @@ public class EditorPage extends BasePage {
         return new PostSettingsPage().waitUntilLoaded();
     }
 
-    /** Fermer l'editeur enregistre l'article en brouillon et revient a la liste. */
     public PostsListPage closeAndSaveDraft() {
         WebElement close = visible(CLOSE_EDITOR);
         close.click();

@@ -4,20 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-/**
- * Lit la configuration des tests UI.
- *
- * Ordre de priorite (le premier trouve gagne) :
- *   1. variable d'environnement  (ex : WP_PASSWORD)
- *   2. propriete systeme Java     (ex : -Dwp.password=...)
- *   3. fichier config.properties  (local, ignore par Git, jamais pousse)
- *   4. fichier config.example.properties (versionne, valeurs par defaut sans secret)
- *
- * Pourquoi : la consigne interdit les mots de passe dans le code source.
- * Les secrets ne vivent donc que dans l'environnement ou dans un fichier local non versionne.
- */
 public final class AppConfig {
-
     private static final Properties PROPS = load();
 
     private AppConfig() {
@@ -26,7 +13,7 @@ public final class AppConfig {
     private static Properties load() {
         Properties props = new Properties();
         readInto(props, "config.example.properties");
-        readInto(props, "config.properties"); // ecrase les valeurs d'exemple si present
+        readInto(props, "config.properties");
         return props;
     }
 
@@ -36,16 +23,15 @@ public final class AppConfig {
                 props.load(in);
             }
         } catch (IOException e) {
-            throw new IllegalStateException("Impossible de lire " + resource, e);
+            throw new IllegalStateException("Cannot read " + resource, e);
         }
     }
 
-    /** Valeur obligatoire : echoue clairement si elle manque, au lieu d'un NullPointerException plus loin. */
     public static String get(String key) {
         String value = find(key);
         if (value == null || value.isBlank()) {
-            throw new IllegalStateException("Configuration manquante : '" + key
-                    + "'. Renseigne-la dans src/test/resources/config.properties ou via la variable "
+            throw new IllegalStateException("Missing configuration: '" + key
+                    + "'. Set it in src/test/resources/config.properties or with the environment variable "
                     + toEnvName(key));
         }
         return value.trim();
@@ -72,7 +58,6 @@ public final class AppConfig {
         return PROPS.getProperty(key);
     }
 
-    /** wp.password -> WP_PASSWORD */
     private static String toEnvName(String key) {
         return key.toUpperCase().replace('.', '_');
     }

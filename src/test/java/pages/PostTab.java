@@ -1,6 +1,5 @@
 package pages;
 
-/** Onglets de la liste des articles. Le libelle est aussi l'accessibilityId de l'onglet. */
 public enum PostTab {
     PUBLISHED("Published"),
     DRAFTS("Drafts"),
