@@ -44,7 +44,6 @@
 
     <build>
         <plugins>
-            <!-- Lance les tests JUnit avec "mvn test" et produit les rapports dans target/surefire-reports -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
