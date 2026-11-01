@@ -233,12 +233,12 @@ driver, `DevicePool`, unique test data) and the tests waiting for the device; ad
 | Name | Role | Tasks
 | :-----------------------: | :-------: | :----------:
 | Logan Comble              |       /   |      /  
-| Alekseï Mollet-Zielinski |       /   |      /  
+| Alekseï Mollet-Zielinski  | UI automation | UI framework, UI tests UI-01 to UI-12, UI test data, parallel configuration, UI documentation (details below) 
 | Théo Neveu                |       /   |      /
 | Audrey Vasseur            | QA Automation Lead |      /  
 | William Willemart         | UI automation | UI framework, UI tests UI-01 to UI-12, UI test data, parallel configuration, UI documentation (details below)
 
-### William Willemart – UI automation
+### William Willemart & Alekseï Zielinski – UI automation
 
 **Area:** UI automation of the WordPress Android app (framework + tests + documentation).
 
