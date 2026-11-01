@@ -20,6 +20,13 @@
             <artifactId>java-client</artifactId>
             <version>11.0.0</version>
         </dependency>
+        <dependency> <!-- Explicit waits (WebDriverWait, ExpectedConditions) used by the UI page objects.
+                          Same version as the selenium-api brought by java-client 11.0.0 -->
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-support</artifactId>
+            <version>4.52.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency> <!-- Automates HTTP requests for API testing -->
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
@@ -34,5 +41,15 @@
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.3</version>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
