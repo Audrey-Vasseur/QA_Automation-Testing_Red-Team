@@ -343,7 +343,7 @@ target/surefire-reports/
 
 |           Name           |        Role        |                                                                         Tasks                                                                          |
 | :----------------------: | :----------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------: |
-|       Logan Comble       |         /          |                                                                           /                                                                            |
+|       Logan Comble       |         QA Reporting & Review          |                Analysis, synthesis and specification compliance tracking, test progress monitoring, architecture compliance verification, design of presentation slides.                                                                           |
 | Alekseï Mollet-Zielinski |   UI automation    |                     UI framework, UI tests UI-01 to UI-12, UI test data, parallel configuration, UI documentation (details below)                      |
 |        Théo Neveu        |   API automation   | API test suite, REST Assured integration, API tests API-01 to API-06, WordPress REST API configuration, response validation and API test documentation |
 |      Audrey Vasseur      | QA Automation Lead |  GitHub repository setup, configuration instructions, base framework setup (Maven, Appium, REST Assured in pom.xml), team task allocation, final presentation co-creation                                                                                    |
