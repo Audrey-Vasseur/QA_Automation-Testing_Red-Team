@@ -260,6 +260,10 @@ To run 2 tests at the same time, start a second emulator and list both in `confi
 ```
 devices=emulator-5554,emulator-5556
 ```
+or
+```
+mvn test -Ddevices="emulator-5554,emulator-5556"
+```
 
 With a single emulator, tests simply wait for the free device (no conflict, but no real concurrency).
 
